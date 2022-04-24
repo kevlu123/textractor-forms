@@ -15,9 +15,10 @@ private:
 
 inline SECURITY_ATTRIBUTES allAccess = std::invoke([] // allows non-admin processes to access kernel objects made by admin processes
 {
+	auto null = [] { return nullptr; }; // To suppress null dacl warning
 	static SECURITY_DESCRIPTOR sd = {};
 	InitializeSecurityDescriptor(&sd, SECURITY_DESCRIPTOR_REVISION);
-	SetSecurityDescriptorDacl(&sd, TRUE, NULL, FALSE);
+	SetSecurityDescriptorDacl(&sd, TRUE, null(), FALSE);
 	return SECURITY_ATTRIBUTES{ sizeof(SECURITY_ATTRIBUTES), &sd, FALSE };
 });
 
@@ -76,35 +77,35 @@ struct SearchParam
 struct InsertHookCmd // From host
 {
 	InsertHookCmd(HookParam hp) : hp(hp) {}
-	HostCommandType command = HOST_COMMAND_NEW_HOOK;
+	HostCommandType command = HostCommandType::HOST_COMMAND_NEW_HOOK;
 	HookParam hp;
 };
 
 struct RemoveHookCmd // From host
 {
 	RemoveHookCmd(uint64_t address) : address(address) {}
-	HostCommandType command = HOST_COMMAND_REMOVE_HOOK;
+	HostCommandType command = HostCommandType::HOST_COMMAND_REMOVE_HOOK;
 	uint64_t address;
 };
 
 struct FindHookCmd // From host
 {
 	FindHookCmd(SearchParam sp) : sp(sp) {}
-	HostCommandType command = HOST_COMMAND_FIND_HOOK;
+	HostCommandType command = HostCommandType::HOST_COMMAND_FIND_HOOK;
 	SearchParam sp;
 };
 
 struct ConsoleOutputNotif // From dll
 {
 	ConsoleOutputNotif(std::string message = "") { strncpy_s(this->message, message.c_str(), MESSAGE_SIZE - 1); }
-	HostNotificationType command = HOST_NOTIFICATION_TEXT;
+	HostNotificationType command = HostNotificationType::HOST_NOTIFICATION_TEXT;
 	char message[MESSAGE_SIZE] = {};
 };
 
 struct HookFoundNotif // From dll
 {
 	HookFoundNotif(HookParam hp, wchar_t* text) : hp(hp) { wcsncpy_s(this->text, text, MESSAGE_SIZE - 1); }
-	HostNotificationType command = HOST_NOTIFICATION_FOUND_HOOK;
+	HostNotificationType command = HostNotificationType::HOST_NOTIFICATION_FOUND_HOOK;
 	HookParam hp;
 	wchar_t text[MESSAGE_SIZE] = {}; // though type is wchar_t, may not be encoded in UTF-16 (it's just convenient to use wcs* functions)
 };
@@ -112,6 +113,6 @@ struct HookFoundNotif // From dll
 struct HookRemovedNotif // From dll
 {
 	HookRemovedNotif(uint64_t address) : address(address) {};
-	HostNotificationType command = HOST_NOTIFICATION_RMVHOOK;
+	HostNotificationType command = HostNotificationType::HOST_NOTIFICATION_RMVHOOK;
 	uint64_t address;
 };

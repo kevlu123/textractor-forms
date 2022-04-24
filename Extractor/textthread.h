@@ -38,6 +38,6 @@ private:
 	std::mutex bufferMutex;
 	DWORD64 lastPushTime = 0;
 	Synchronized<std::vector<std::wstring>> queuedSentences;
-	struct TimerDeleter { void operator()(HANDLE h) { DeleteTimerQueueTimer(NULL, h, INVALID_HANDLE_VALUE); } };
+	struct TimerDeleter { void operator()(HANDLE h) { (void)DeleteTimerQueueTimer(NULL, h, INVALID_HANDLE_VALUE); } };
 	AutoHandle<TimerDeleter> timer = NULL;
 };

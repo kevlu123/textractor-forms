@@ -40,7 +40,7 @@ void TextThread::Push(BYTE* data, int length)
 	if (length < 0) return;
 	std::scoped_lock lock(bufferMutex);
 
-	BYTE doubleByteChar[2];
+	BYTE doubleByteChar[2]{};
 	if (length == 1) // doublebyte characters must be processed as pairs
 	{
 		if (leadByte)

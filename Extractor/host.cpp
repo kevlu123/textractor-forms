@@ -88,9 +88,12 @@ namespace
 			SetEvent(pipeAvailableEvent);
 			ConnectNamedPipe(hookPipe, nullptr);
 
-			BYTE buffer[PIPE_BUFFER_SIZE] = {};
-			DWORD bytesRead, processId;
-			ReadFile(hookPipe, &processId, sizeof(processId), &bytesRead, nullptr);
+			//BYTE buffer[PIPE_BUFFER_SIZE] = {};
+			std::vector<BYTE> mybuffer(PIPE_BUFFER_SIZE); // Move buffer to heap to suppress warning
+			BYTE* buffer = mybuffer.data();
+
+			DWORD bytesRead{}, processId{};
+			(void)ReadFile(hookPipe, &processId, sizeof(processId), &bytesRead, nullptr);
 			processRecordsByIds->try_emplace(processId, processId, hostPipe);
 			OnConnect(processId);
 
@@ -99,10 +102,10 @@ namespace
 			while (ReadFile(hookPipe, buffer, PIPE_BUFFER_SIZE, &bytesRead, nullptr))
 				switch (*(HostNotificationType*)buffer)
 				{
-				case HOST_NOTIFICATION_FOUND_HOOK:
+				case HostNotificationType::HOST_NOTIFICATION_FOUND_HOOK:
 				{
 					auto info = *(HookFoundNotif*)buffer;
-					auto OnHookFound = processRecordsByIds->at(processId).OnHookFound;
+					Host::HookEventHandler OnHookFound = processRecordsByIds->at(processId).OnHookFound;
 					std::wstring wide = info.text;
 					if (wide.size() > STRING) OnHookFound(info.hp, std::move(info.text));
 					info.hp.type &= ~USING_UNICODE;
@@ -112,13 +115,13 @@ namespace
 						if (converted->size() > STRING) OnHookFound(info.hp, std::move(converted.value()));
 				}
 				break;
-				case HOST_NOTIFICATION_RMVHOOK:
+				case HostNotificationType::HOST_NOTIFICATION_RMVHOOK:
 				{
 					auto info = *(HookRemovedNotif*)buffer;
 					RemoveThreads([&](ThreadParam tp) { return tp.processId == processId && tp.addr == info.address; });
 				}
 				break;
-				case HOST_NOTIFICATION_TEXT:
+				case HostNotificationType::HOST_NOTIFICATION_TEXT:
 				{
 					auto info = *(ConsoleOutputNotif*)buffer;
 					Host::AddConsoleOutput(StringToWideString(info.message));
@@ -195,7 +198,9 @@ namespace Host
 		{
 			if (processId == GetCurrentProcessId()) return;
 
-			WinMutex(ITH_HOOKMAN_MUTEX_ + std::to_wstring(processId));
+			{
+				WinMutex dummy(ITH_HOOKMAN_MUTEX_ + std::to_wstring(processId));
+			}
 			if (GetLastError() == ERROR_ALREADY_EXISTS) return AddConsoleOutput(ALREADY_INJECTED);
 
 			if (AutoHandle<> process = OpenProcess(PROCESS_ALL_ACCESS, FALSE, processId))
@@ -222,7 +227,7 @@ namespace Host
 
 	void DetachProcess(DWORD processId)
 	{
-		processRecordsByIds->at(processId).Send(HOST_COMMAND_DETACH);
+		processRecordsByIds->at(processId).Send(HostCommandType::HOST_COMMAND_DETACH);
 	}
 
 	void InsertHook(DWORD processId, HookParam hp)

@@ -61,7 +61,7 @@ bool SentenceReceived(TextThread& thread, std::wstring& text) {
 
 int main() {
 
-	_setmode(_fileno(stdout), _O_U16TEXT);
+	(void)_setmode(_fileno(stdout), _O_U16TEXT);
 	//_setmode(_fileno(stdin), _O_U16TEXT);
 
 	CONSOLE_FONT_INFOEX cfi{};
