@@ -95,7 +95,7 @@ void TextThread::Flush()
 {
 	{
 		auto storage = this->storage.Acquire();
-		if (storage->size() > maxHistorySize) storage->erase(0, storage->size() - maxHistorySize); // https://github.com/Artikash/Textractor/issues/127#issuecomment-486882983
+		if (storage->size() > (size_t)maxHistorySize) storage->erase(0, storage->size() - maxHistorySize); // https://github.com/Artikash/Textractor/issues/127#issuecomment-486882983
 	}
 
 	std::vector<std::wstring> sentences;
@@ -110,7 +110,7 @@ void TextThread::Flush()
 
 	std::scoped_lock lock(bufferMutex);
 	if (buffer.empty()) return;
-	if (buffer.size() > maxBufferSize || GetTickCount64() - lastPushTime > flushDelay)
+	if (buffer.size() > (size_t)maxBufferSize || GetTickCount64() - lastPushTime > flushDelay)
 	{
 		AddSentence(std::move(buffer));
 		buffer.clear();

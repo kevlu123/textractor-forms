@@ -172,7 +172,14 @@ namespace
 		{
 			hp.type |= FUNCTION_OFFSET;
 			std::wstring func = match[3];
-			strncpy_s(hp.function, std::string(func.begin(), func.end()).erase(0, 1).c_str(), MAX_MODULE_SIZE - 1);
+			auto toNarrow = [](const auto& s) {
+				std::string w;
+				for (auto c : s)
+					w.push_back((char)c);
+				return w;
+			};
+
+			strncpy_s(hp.function, toNarrow(func).erase(0, 1).c_str(), MAX_MODULE_SIZE - 1);
 		}
 
 		// ITH has registers offset by 4 vs AGTH: need this to correct
