@@ -1,5 +1,6 @@
 ﻿#include "host.h"
 #include "hookcode.h"
+#include "module.h"
 #include <fstream>
 #include <io.h>
 #include <fcntl.h>
