@@ -1,7 +1,6 @@
 ﻿#include "host.h"
 #include "hookcode.h"
 #include "module.h"
-#include <fstream>
 #include <io.h>
 #include <fcntl.h>
 
@@ -24,45 +23,42 @@ std::unordered_multimap<std::wstring, DWORD> GetFilteredProcesses() {
 	return processes;
 }
 
-std::wstring ExtractFilenameFromPath(std::wstring path) {
-	auto pos = path.find_last_of('\\');
-	if (pos == std::wstring::npos)
-		return path;
-	return path.substr(pos + 1);
-}
+struct Callbacks {
+	void(*cb1)(DWORD);
+	void(*cb2)(DWORD);
+	void(*cb3)(void*, const wchar_t*);
+	void(*cb4)(void*, const wchar_t*);
+	void(*cb5)(void*, const wchar_t*, const wchar_t*);
+} cbs{};
 
 void ProcessConnected(DWORD pid) {
-	Print(L"ProcessConnected", pid);
+	Print(L"Native ProcessConnected", pid);
+	cbs.cb1(pid);
 }
 
 void ProcessDisconnected(DWORD pid) {
-	Print(L"ProcessDisconnected", pid);
+	Print(L"Native ProcessDisconnected", pid);
+	cbs.cb2(pid);
 }
 
 void ThreadAdded(TextThread& thread) {
-	Print(L"ThreadAdded", thread.name);
+	Print(L"Native ThreadAdded", thread.name);
+	cbs.cb3(&thread, thread.name.c_str());
 }
 
 void ThreadRemoved(TextThread& thread) {
-	Print(L"ThreadRemoved", thread.name);
-}
-
-bool Contains(const std::wstring& s, const std::wstring& x) {
-	return s.find(x) != std::wstring::npos;
+	Print(L"Native ThreadRemoved", thread.name);
+	cbs.cb4(&thread, thread.name.c_str());
 }
 
 bool SentenceReceived(TextThread& thread, std::wstring& text) {
-	//if (thread.tp.addr != 1977016304) return false;
-	//if (thread.tp.ctx != 10545442) return false;
-
-	Print(L"SentenceReceived", thread.name, text);
+	Print(L"Native SentenceReceived", thread.name, text);
+	cbs.cb5(&thread, thread.name.c_str(), text.c_str());
 	return true;
 }
 
-int main() {
-
+void Init() {
 	(void)_setmode(_fileno(stdout), _O_U16TEXT);
-	//_setmode(_fileno(stdin), _O_U16TEXT);
 
 	CONSOLE_FONT_INFOEX cfi{};
 	cfi.cbSize = sizeof cfi;
@@ -73,34 +69,34 @@ int main() {
 	cfi.FontWeight = FW_NORMAL;
 	wcscpy(cfi.FaceName, L"MS Gothic");
 	SetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE), FALSE, &cfi);
+}
 
-	auto processes = GetFilteredProcesses();
-	//for (auto& [processId, processName] : processes) {
-	//	out << processId << "\t" << ExtractFilenameFromPath(processName) << std::endl;
-	//}
+#define EXT_DLL_EXPORT __declspec(dllexport)
 
-	std::wstring name = LR"(C:\Stuff\Visual Novels\Sugar Style FD\SugarStyle_恋人以上夫婦未満アフターストーリー\SugarStyle_恋人以上夫婦未満アフターストーリー.exe)";
-
-	if (!processes.contains(name)) {
-		Print(L"No Process selected");
-		return 0;
-	} else {
-		Print(L"Selected process: ", name);
+extern "C" {
+	EXT_DLL_EXPORT const wchar_t* Ext_GetProcessList() {
+		static std::wstring processList;
+		for (auto& [processId, processName] : GetAllProcesses())
+			if (processName.has_value())
+				processList += std::to_wstring(processId) + L"|" + processName.value() + L"|";
+		return processList.c_str();
 	}
 
-	Host::Start(ProcessConnected, ProcessDisconnected, ThreadAdded, ThreadRemoved, SentenceReceived);
-
-	auto range = processes.equal_range(name);
-	DWORD pid = 0;
-	for (auto& p = range.first; p != range.second; ++p) {
-		Host::InjectProcess(p->second);
-		pid = p->second;
-	}
-
-	while (true)
+	EXT_DLL_EXPORT void Ext_Start(
+		void(*cb1)(DWORD),
+		void(*cb2)(DWORD),
+		void(*cb3)(void*, const wchar_t*),
+		void(*cb4)(void*, const wchar_t*),
+		void(*cb5)(void*, const wchar_t*, const wchar_t*)
+	)
 	{
-		Sleep(100);
+		cbs = { cb1, cb2, cb3, cb4, cb5 };
+		Host::Start(ProcessConnected, ProcessDisconnected, ThreadAdded, ThreadRemoved, SentenceReceived);
 	}
 
-	return 0;
+	EXT_DLL_EXPORT void Ext_InjectProcess(int pid) {
+		for (auto& [processId, processName] : GetAllProcesses())
+			if (processId == pid)
+				Host::InjectProcess((DWORD)pid);
+	}
 }

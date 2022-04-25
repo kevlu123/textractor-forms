@@ -63,4 +63,7 @@
   <ItemGroup>
     <CopyFileToFolders Include="minhook_x86.dll" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="cpp.hint" />
+  </ItemGroup>
 </Project>

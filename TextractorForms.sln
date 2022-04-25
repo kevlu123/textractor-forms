@@ -5,22 +5,45 @@ VisualStudioVersion = 17.1.32228.430
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Extractor", "Extractor\Extractor.vcxproj", "{6FF6548B-B77E-47DA-AE7A-7ACF57D03175}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextractorForms", "TextractorForms\TextractorForms.csproj", "{F456E80E-EBDB-4103-9845-7B83849768BD}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6FF6548B-B77E-47DA-AE7A-7ACF57D03175} = {6FF6548B-B77E-47DA-AE7A-7ACF57D03175}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
 		Debug|x64 = Debug|x64
 		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6FF6548B-B77E-47DA-AE7A-7ACF57D03175}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{6FF6548B-B77E-47DA-AE7A-7ACF57D03175}.Debug|Any CPU.Build.0 = Debug|x64
 		{6FF6548B-B77E-47DA-AE7A-7ACF57D03175}.Debug|x64.ActiveCfg = Debug|x64
 		{6FF6548B-B77E-47DA-AE7A-7ACF57D03175}.Debug|x64.Build.0 = Debug|x64
 		{6FF6548B-B77E-47DA-AE7A-7ACF57D03175}.Debug|x86.ActiveCfg = Debug|Win32
 		{6FF6548B-B77E-47DA-AE7A-7ACF57D03175}.Debug|x86.Build.0 = Debug|Win32
+		{6FF6548B-B77E-47DA-AE7A-7ACF57D03175}.Release|Any CPU.ActiveCfg = Release|x64
+		{6FF6548B-B77E-47DA-AE7A-7ACF57D03175}.Release|Any CPU.Build.0 = Release|x64
 		{6FF6548B-B77E-47DA-AE7A-7ACF57D03175}.Release|x64.ActiveCfg = Release|x64
 		{6FF6548B-B77E-47DA-AE7A-7ACF57D03175}.Release|x64.Build.0 = Release|x64
 		{6FF6548B-B77E-47DA-AE7A-7ACF57D03175}.Release|x86.ActiveCfg = Release|Win32
 		{6FF6548B-B77E-47DA-AE7A-7ACF57D03175}.Release|x86.Build.0 = Release|Win32
+		{F456E80E-EBDB-4103-9845-7B83849768BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F456E80E-EBDB-4103-9845-7B83849768BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F456E80E-EBDB-4103-9845-7B83849768BD}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F456E80E-EBDB-4103-9845-7B83849768BD}.Debug|x64.Build.0 = Debug|Any CPU
+		{F456E80E-EBDB-4103-9845-7B83849768BD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F456E80E-EBDB-4103-9845-7B83849768BD}.Debug|x86.Build.0 = Debug|Any CPU
+		{F456E80E-EBDB-4103-9845-7B83849768BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F456E80E-EBDB-4103-9845-7B83849768BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F456E80E-EBDB-4103-9845-7B83849768BD}.Release|x64.ActiveCfg = Release|Any CPU
+		{F456E80E-EBDB-4103-9845-7B83849768BD}.Release|x64.Build.0 = Release|Any CPU
+		{F456E80E-EBDB-4103-9845-7B83849768BD}.Release|x86.ActiveCfg = Release|Any CPU
+		{F456E80E-EBDB-4103-9845-7B83849768BD}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
