@@ -171,6 +171,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
+    <CopyFileToFolders Include="TextHook.dll">
+      <FileType>Document</FileType>
+    </CopyFileToFolders>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

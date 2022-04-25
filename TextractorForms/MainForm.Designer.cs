@@ -123,6 +123,7 @@
             this.MinimumSize = new System.Drawing.Size(595, 418);
             this.Name = "MainForm";
             this.Text = "TextractorForms";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.OnFormClosed);
             this.ClientSizeChanged += new System.EventHandler(this.OnResize);
             this.ResumeLayout(false);
             this.PerformLayout();

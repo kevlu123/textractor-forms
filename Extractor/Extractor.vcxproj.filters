@@ -62,6 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="minhook_x86.dll" />
+    <CopyFileToFolders Include="TextHook.dll" />
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextractorForms", "Textract
 		{6FF6548B-B77E-47DA-AE7A-7ACF57D03175} = {6FF6548B-B77E-47DA-AE7A-7ACF57D03175}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Socket", "Socket\Socket.vcxproj", "{A7A6C7E9-CE74-4749-989B-F740D8FAB4F3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +46,18 @@ Global
 		{F456E80E-EBDB-4103-9845-7B83849768BD}.Release|x64.Build.0 = Release|Any CPU
 		{F456E80E-EBDB-4103-9845-7B83849768BD}.Release|x86.ActiveCfg = Release|Any CPU
 		{F456E80E-EBDB-4103-9845-7B83849768BD}.Release|x86.Build.0 = Release|Any CPU
+		{A7A6C7E9-CE74-4749-989B-F740D8FAB4F3}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{A7A6C7E9-CE74-4749-989B-F740D8FAB4F3}.Debug|Any CPU.Build.0 = Debug|x64
+		{A7A6C7E9-CE74-4749-989B-F740D8FAB4F3}.Debug|x64.ActiveCfg = Debug|x64
+		{A7A6C7E9-CE74-4749-989B-F740D8FAB4F3}.Debug|x64.Build.0 = Debug|x64
+		{A7A6C7E9-CE74-4749-989B-F740D8FAB4F3}.Debug|x86.ActiveCfg = Debug|Win32
+		{A7A6C7E9-CE74-4749-989B-F740D8FAB4F3}.Debug|x86.Build.0 = Debug|Win32
+		{A7A6C7E9-CE74-4749-989B-F740D8FAB4F3}.Release|Any CPU.ActiveCfg = Release|x64
+		{A7A6C7E9-CE74-4749-989B-F740D8FAB4F3}.Release|Any CPU.Build.0 = Release|x64
+		{A7A6C7E9-CE74-4749-989B-F740D8FAB4F3}.Release|x64.ActiveCfg = Release|x64
+		{A7A6C7E9-CE74-4749-989B-F740D8FAB4F3}.Release|x64.Build.0 = Release|x64
+		{A7A6C7E9-CE74-4749-989B-F740D8FAB4F3}.Release|x86.ActiveCfg = Release|Win32
+		{A7A6C7E9-CE74-4749-989B-F740D8FAB4F3}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

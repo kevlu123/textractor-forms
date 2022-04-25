@@ -24,7 +24,7 @@ namespace TextractorForms {
             ThreadAdded(IntPtr.Zero, "Console");
             textThread_Dropdown.SelectedIndex = 0;
 
-            timer.Interval = 50;
+            timer.Interval = 200;
             timer.Start();
 
             OnResize(this, EventArgs.Empty);
@@ -141,6 +141,10 @@ namespace TextractorForms {
             } else {
                 console_Textbox.Clear();
             }
+        }
+
+        private void OnFormClosed(object sender, FormClosedEventArgs e) {
+
         }
     }
 }
