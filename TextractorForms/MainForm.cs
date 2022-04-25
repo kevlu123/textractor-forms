@@ -15,10 +15,13 @@ namespace TextractorForms {
         private readonly Dictionary<IntPtr, TextThreadData> textThreadData = new Dictionary<IntPtr, TextThreadData>();
         private readonly List<IntPtr> textThreads = new List<IntPtr>();
         private int attachedPid = 0;
+        private IntPtr server = IntPtr.Zero;
 
         public MainForm() {
             instance = this;
             InitializeComponent();
+
+            server = Interop.Socket_ServerOpenWrapper(42942, OnServerRecv);
 
             Interop.Ext_StartWrapper();
             ThreadAdded(IntPtr.Zero, "Console");
@@ -55,13 +58,15 @@ namespace TextractorForms {
         }
 
         private void OnTimerTicked(object sender, EventArgs e) {
-            Interop.Synchronize(
+            Interop.SynchronizeTexthook(
                 ProcessConnected,
                 ProcessDisconnected,
                 ThreadAdded,
                 ThreadRemoved,
                 SentenceReceived
                 );
+
+            Interop.Socket_ServerUpdate(server);
         }
 
         private static string Hex(IntPtr p) {
@@ -144,7 +149,11 @@ namespace TextractorForms {
         }
 
         private void OnFormClosed(object sender, FormClosedEventArgs e) {
+            Interop.Socket_ServerClose(server);
+        }
 
+        private void OnServerRecv(string data) {
+            Log("Tcp: " + data);
         }
     }
 }
