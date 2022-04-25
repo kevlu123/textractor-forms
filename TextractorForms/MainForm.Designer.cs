@@ -28,9 +28,9 @@
             this.textThread_Dropdown = new System.Windows.Forms.ComboBox();
             this.console_Textbox = new System.Windows.Forms.TextBox();
             this.detach_Button = new System.Windows.Forms.Button();
-            this.searchHooks_Button = new System.Windows.Forms.Button();
             this.timer = new System.Windows.Forms.Timer(this.components);
-            this.processes_Dropdown = new System.Windows.Forms.ComboBox();
+            this.process_Label = new System.Windows.Forms.Label();
+            this.zen_Button = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // attach_Button
@@ -58,10 +58,12 @@
             // 
             // console_Textbox
             // 
+            this.console_Textbox.BackColor = System.Drawing.SystemColors.Window;
             this.console_Textbox.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.console_Textbox.Location = new System.Drawing.Point(143, 38);
             this.console_Textbox.Multiline = true;
             this.console_Textbox.Name = "console_Textbox";
+            this.console_Textbox.ReadOnly = true;
             this.console_Textbox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.console_Textbox.Size = new System.Drawing.Size(429, 335);
             this.console_Textbox.TabIndex = 3;
@@ -77,41 +79,43 @@
             this.detach_Button.Text = "Detach from game";
             this.detach_Button.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.detach_Button.UseVisualStyleBackColor = true;
-            // 
-            // searchHooks_Button
-            // 
-            this.searchHooks_Button.Enabled = false;
-            this.searchHooks_Button.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.searchHooks_Button.Location = new System.Drawing.Point(6, 100);
-            this.searchHooks_Button.Name = "searchHooks_Button";
-            this.searchHooks_Button.Size = new System.Drawing.Size(131, 25);
-            this.searchHooks_Button.TabIndex = 11;
-            this.searchHooks_Button.Text = "Search for hooks";
-            this.searchHooks_Button.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.searchHooks_Button.UseVisualStyleBackColor = true;
+            this.detach_Button.Click += new System.EventHandler(this.DetachPressed);
             // 
             // timer
             // 
             this.timer.Interval = 1000;
             this.timer.Tick += new System.EventHandler(this.OnTimerTicked);
             // 
-            // processes_Dropdown
+            // process_Label
             // 
-            this.processes_Dropdown.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.processes_Dropdown.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.processes_Dropdown.FormattingEnabled = true;
-            this.processes_Dropdown.Location = new System.Drawing.Point(6, 7);
-            this.processes_Dropdown.Name = "processes_Dropdown";
-            this.processes_Dropdown.Size = new System.Drawing.Size(131, 25);
-            this.processes_Dropdown.TabIndex = 12;
+            this.process_Label.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.process_Label.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.process_Label.Location = new System.Drawing.Point(6, 7);
+            this.process_Label.Name = "process_Label";
+            this.process_Label.Size = new System.Drawing.Size(131, 25);
+            this.process_Label.TabIndex = 12;
+            this.process_Label.Text = "No process";
+            this.process_Label.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // zen_Button
+            // 
+            this.zen_Button.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.zen_Button.Location = new System.Drawing.Point(6, 100);
+            this.zen_Button.Name = "zen_Button";
+            this.zen_Button.Size = new System.Drawing.Size(131, 25);
+            this.zen_Button.TabIndex = 13;
+            this.zen_Button.Text = "Zen Mode";
+            this.zen_Button.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.zen_Button.UseVisualStyleBackColor = true;
+            this.zen_Button.Click += new System.EventHandler(this.ZenModeClicked);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(579, 379);
-            this.Controls.Add(this.processes_Dropdown);
-            this.Controls.Add(this.searchHooks_Button);
+            this.Controls.Add(this.zen_Button);
+            this.Controls.Add(this.process_Label);
             this.Controls.Add(this.detach_Button);
             this.Controls.Add(this.console_Textbox);
             this.Controls.Add(this.textThread_Dropdown);
@@ -127,12 +131,12 @@
 
         #endregion
         private System.Windows.Forms.Button attach_Button;
-        private System.Windows.Forms.TextBox console_Textbox;
         private System.Windows.Forms.Button detach_Button;
-        private System.Windows.Forms.Button searchHooks_Button;
         private System.Windows.Forms.Timer timer;
         private System.Windows.Forms.ComboBox textThread_Dropdown;
-        private System.Windows.Forms.ComboBox processes_Dropdown;
+        private System.Windows.Forms.Label process_Label;
+        private System.Windows.Forms.Button zen_Button;
+        public System.Windows.Forms.TextBox console_Textbox;
     }
 }
 

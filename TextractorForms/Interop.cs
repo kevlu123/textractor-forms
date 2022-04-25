@@ -25,6 +25,9 @@ namespace TextractorForms {
         [DllImport("Extractor.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void Ext_InjectProcess(int pid);
 
+        [DllImport("Extractor.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void Ext_DetachProcess(int pid);
+
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void ProcessConnectedNative(int pid);
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -88,6 +91,7 @@ namespace TextractorForms {
                 lock (mtx) { sentenceReceivedQueue.Enqueue((addr, s(name), s(text))); }
             }
 
+            // Prevent GC from collecting these delegates
             cb1 = processConnected;
             cb2 = processDisconnected;
             cb3 = threadAdded;

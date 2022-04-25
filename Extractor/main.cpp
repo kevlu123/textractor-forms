@@ -32,43 +32,44 @@ struct Callbacks {
 } cbs{};
 
 void ProcessConnected(DWORD pid) {
-	Print(L"Native ProcessConnected", pid);
+	//Print(L"Native ProcessConnected", pid);
 	cbs.cb1(pid);
 }
 
 void ProcessDisconnected(DWORD pid) {
-	Print(L"Native ProcessDisconnected", pid);
+	//Print(L"Native ProcessDisconnected", pid);
 	cbs.cb2(pid);
 }
 
 void ThreadAdded(TextThread& thread) {
-	Print(L"Native ThreadAdded", thread.name);
+	//Print(L"Native ThreadAdded", thread.name);
 	cbs.cb3(&thread, thread.name.c_str());
 }
 
 void ThreadRemoved(TextThread& thread) {
-	Print(L"Native ThreadRemoved", thread.name);
+	//Print(L"Native ThreadRemoved", thread.name);
 	cbs.cb4(&thread, thread.name.c_str());
 }
 
 bool SentenceReceived(TextThread& thread, std::wstring& text) {
-	Print(L"Native SentenceReceived", thread.name, text);
+	//Print(L"Native SentenceReceived", thread.name, text);
 	cbs.cb5(&thread, thread.name.c_str(), text.c_str());
 	return true;
 }
 
 void Init() {
-	(void)_setmode(_fileno(stdout), _O_U16TEXT);
-
-	CONSOLE_FONT_INFOEX cfi{};
-	cfi.cbSize = sizeof cfi;
-	cfi.nFont = 0;
-	cfi.dwFontSize.X = 0;
-	cfi.dwFontSize.Y = 20;
-	cfi.FontFamily = FF_DONTCARE;
-	cfi.FontWeight = FW_NORMAL;
-	wcscpy(cfi.FaceName, L"MS Gothic");
-	SetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE), FALSE, &cfi);
+	TextThread::flushDelay = 0;
+	//(void)_setmode(_fileno(stdout), _O_U16TEXT);
+	//
+	//CONSOLE_FONT_INFOEX cfi{};
+	//cfi.cbSize = sizeof cfi;
+	//cfi.nFont = 0;
+	//cfi.dwFontSize.X = 0;
+	//cfi.dwFontSize.Y = 20;
+	//cfi.FontFamily = FF_DONTCARE;
+	//cfi.FontWeight = FW_NORMAL;
+	//wcscpy(cfi.FaceName, L"MS Gothic");
+	//SetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE), FALSE, &cfi);
 }
 
 #define EXT_DLL_EXPORT __declspec(dllexport)
@@ -76,6 +77,7 @@ void Init() {
 extern "C" {
 	EXT_DLL_EXPORT const wchar_t* Ext_GetProcessList() {
 		static std::wstring processList;
+		processList.clear();
 		for (auto& [processId, processName] : GetAllProcesses())
 			if (processName.has_value())
 				processList += std::to_wstring(processId) + L"|" + processName.value() + L"|";
@@ -98,5 +100,11 @@ extern "C" {
 		for (auto& [processId, processName] : GetAllProcesses())
 			if (processId == pid)
 				Host::InjectProcess((DWORD)pid);
+	}
+
+	EXT_DLL_EXPORT void Ext_DetachProcess(int pid) {
+		for (auto& [processId, processName] : GetAllProcesses())
+			if (processId == pid)
+				Host::DetachProcess((DWORD)pid);
 	}
 }

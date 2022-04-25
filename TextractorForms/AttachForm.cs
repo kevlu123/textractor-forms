@@ -10,13 +10,11 @@ using System.Windows.Forms;
 
 namespace TextractorForms {
     public partial class AttachForm : Form {
-        public static string LastProcessPressed { get; private set; }
-
         private readonly List<(int pid, string path)> processList;
 
         private class ProcessComparer : IComparer<(int pid, string path)> {
             public int Compare((int pid, string path) a, (int pid, string path) b) {
-                return a.path.CompareTo(b.path);
+                return PrettyPath(a.path).CompareTo(PrettyPath(b.path));
             }
         }
 
@@ -40,7 +38,6 @@ namespace TextractorForms {
                 return;
             int index = process_ListView.SelectedItems[0].Index;
 
-            LastProcessPressed = PrettyPath(processList[index].path);
             Interop.Ext_InjectProcess(processList[index].pid);
             this.Close();
         }

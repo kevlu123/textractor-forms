@@ -11,10 +11,13 @@ using System.Diagnostics;
 
 namespace TextractorForms {
     public partial class MainForm : Form {
+        public static MainForm instance;
         private readonly Dictionary<IntPtr, TextThreadData> textThreadData = new Dictionary<IntPtr, TextThreadData>();
         private readonly List<IntPtr> textThreads = new List<IntPtr>();
+        private int attachedPid = 0;
 
         public MainForm() {
+            instance = this;
             InitializeComponent();
 
             Interop.Ext_StartWrapper();
@@ -28,7 +31,7 @@ namespace TextractorForms {
         }
 
         private void OnResize(object sender, EventArgs e) {
-            int rightColWidth = ClientSize.Width - processes_Dropdown.Width - 20;
+            int rightColWidth = ClientSize.Width - attach_Button.Width - 20;
             textThread_Dropdown.Width = rightColWidth;
             console_Textbox.Width = rightColWidth;
             console_Textbox.Height = ClientSize.Height - textThread_Dropdown.Height - 20;
@@ -37,6 +40,18 @@ namespace TextractorForms {
         private void AttachPressed(object sender, EventArgs e) {
             var form = new AttachForm();
             form.ShowDialog();
+        }
+
+        private void DetachPressed(object sender, EventArgs e) {
+            Interop.Ext_DetachProcess(attachedPid);
+        }
+        private void ZenModeClicked(object sender, EventArgs e) {
+            this.Hide();
+            var form = new ZenForm();
+            console_Textbox.TextChanged += form.OnTextChanged;
+            form.ShowDialog();
+            console_Textbox.TextChanged -= form.OnTextChanged;
+            this.Show();
         }
 
         private void OnTimerTicked(object sender, EventArgs e) {
@@ -55,12 +70,25 @@ namespace TextractorForms {
 
         private void ProcessConnected(int pid) {
             Log($"ProcessConnected {pid}");
-            processes_Dropdown.Enabled = true;
-            processes_Dropdown.DataSource = new List<string> { AttachForm.LastProcessPressed };
+            process_Label.Text = Process.GetProcessById(pid).ProcessName;
+            attachedPid = pid;
+
+            attach_Button.Enabled = false;
+            detach_Button.Enabled = true;
         }
 
         private void ProcessDisconnected(int pid) {
             Log($"ProcessDisconnected {pid}");
+
+            process_Label.Text = "No process";
+            for (int i = 1; i < textThreads.Count; i++)
+                textThreadData.Remove(textThreads[i]);
+            textThreads.RemoveRange(1, textThreads.Count - 1);
+            attachedPid = 0;
+            textThread_Dropdown.SelectedIndex = 0;
+
+            attach_Button.Enabled = true;
+            detach_Button.Enabled = false;
         }
 
         private void ThreadAdded(IntPtr addr, string name) {
@@ -69,9 +97,12 @@ namespace TextractorForms {
             if (name == "Clipboard")
                 return;
 
-            textThread_Dropdown.Items.Add($"{Hex(addr)} {name}");
+            if (name != "Console")
+                textThread_Dropdown.Items.Add($"{Hex(addr)} {name}");
+            else
+                textThread_Dropdown.Items.Add(name);
             textThreads.Add(addr);
-            textThreadData.Add(addr, new TextThreadData() { Translate = name != "Console" });
+            textThreadData.Add(addr, new TextThreadData() { Translatable = name != "Console" });
             Log($"ThreadAdded {Hex(addr)} {name}");
         }
 
@@ -89,10 +120,16 @@ namespace TextractorForms {
             if (!textThreadData.ContainsKey(addr))
                 textThreadData.Add(addr, new TextThreadData());
             textThreadData[addr].AddEntry(text);
+
+            try {
+                if (textThreads[textThread_Dropdown.SelectedIndex] == addr) {
+                    console_Textbox.AppendText("\r\n" + textThreadData[addr].Last().DisplayText());
+                }
+            } catch (ArgumentOutOfRangeException) { }
         }
 
         public void Log(object obj) {
-            Debug.WriteLine(obj.ToString());
+            //Debug.WriteLine(obj.ToString());
             SentenceReceived(IntPtr.Zero, "Console", obj.ToString());
         }
 
