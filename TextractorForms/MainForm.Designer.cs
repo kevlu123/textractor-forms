@@ -204,7 +204,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MinimumSize = new System.Drawing.Size(595, 418);
             this.Name = "MainForm";
-            this.Text = "TextractorForms";
+            this.Text = "TextractorForms v1.0";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.OnFormClosed);
             this.ClientSizeChanged += new System.EventHandler(this.OnResize);
             this.ResumeLayout(false);
