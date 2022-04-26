@@ -28,7 +28,7 @@
             // 
             // console_Textbox
             // 
-            this.console_Textbox.BackColor = System.Drawing.SystemColors.MenuHighlight;
+            this.console_Textbox.BackColor = System.Drawing.SystemColors.InactiveCaption;
             this.console_Textbox.Font = new System.Drawing.Font("Segoe UI", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.console_Textbox.ForeColor = System.Drawing.SystemColors.Window;
             this.console_Textbox.Location = new System.Drawing.Point(7, 7);
@@ -43,7 +43,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.SystemColors.MenuHighlight;
+            this.BackColor = System.Drawing.SystemColors.InactiveCaption;
             this.ClientSize = new System.Drawing.Size(1197, 276);
             this.Controls.Add(this.console_Textbox);
             this.Name = "ZenForm";
@@ -59,6 +59,6 @@
 
         #endregion
 
-        private System.Windows.Forms.TextBox console_Textbox;
+        public System.Windows.Forms.TextBox console_Textbox;
     }
 }

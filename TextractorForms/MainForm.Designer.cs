@@ -31,6 +31,12 @@
             this.timer = new System.Windows.Forms.Timer(this.components);
             this.process_Label = new System.Windows.Forms.Label();
             this.zen_Button = new System.Windows.Forms.Button();
+            this.translate_Button = new System.Windows.Forms.Button();
+            this.manualTranslateInput_Textbox = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.clipboard_Checkbox = new System.Windows.Forms.CheckBox();
+            this.autoTranslate_Checkbox = new System.Windows.Forms.CheckBox();
+            this.manualTranslateOutput_Textbox = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // attach_Button
@@ -109,11 +115,85 @@
             this.zen_Button.UseVisualStyleBackColor = true;
             this.zen_Button.Click += new System.EventHandler(this.ZenModeClicked);
             // 
+            // translate_Button
+            // 
+            this.translate_Button.Enabled = false;
+            this.translate_Button.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.translate_Button.Location = new System.Drawing.Point(6, 187);
+            this.translate_Button.Name = "translate_Button";
+            this.translate_Button.Size = new System.Drawing.Size(131, 25);
+            this.translate_Button.TabIndex = 14;
+            this.translate_Button.Text = "Manual Translate";
+            this.translate_Button.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.translate_Button.UseVisualStyleBackColor = true;
+            this.translate_Button.Click += new System.EventHandler(this.ManualTranslateClicked);
+            // 
+            // manualTranslateInput_Textbox
+            // 
+            this.manualTranslateInput_Textbox.BackColor = System.Drawing.SystemColors.Window;
+            this.manualTranslateInput_Textbox.Enabled = false;
+            this.manualTranslateInput_Textbox.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.manualTranslateInput_Textbox.Location = new System.Drawing.Point(6, 218);
+            this.manualTranslateInput_Textbox.Multiline = true;
+            this.manualTranslateInput_Textbox.Name = "manualTranslateInput_Textbox";
+            this.manualTranslateInput_Textbox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.manualTranslateInput_Textbox.Size = new System.Drawing.Size(131, 71);
+            this.manualTranslateInput_Textbox.TabIndex = 15;
+            // 
+            // label1
+            // 
+            this.label1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.label1.Location = new System.Drawing.Point(10, 177);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(122, 2);
+            this.label1.TabIndex = 16;
+            // 
+            // clipboard_Checkbox
+            // 
+            this.clipboard_Checkbox.AutoSize = true;
+            this.clipboard_Checkbox.Location = new System.Drawing.Point(12, 131);
+            this.clipboard_Checkbox.Name = "clipboard_Checkbox";
+            this.clipboard_Checkbox.Size = new System.Drawing.Size(108, 17);
+            this.clipboard_Checkbox.TabIndex = 17;
+            this.clipboard_Checkbox.Text = "Copy to clipboard";
+            this.clipboard_Checkbox.UseVisualStyleBackColor = true;
+            // 
+            // autoTranslate_Checkbox
+            // 
+            this.autoTranslate_Checkbox.AutoSize = true;
+            this.autoTranslate_Checkbox.Checked = true;
+            this.autoTranslate_Checkbox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.autoTranslate_Checkbox.Location = new System.Drawing.Point(13, 154);
+            this.autoTranslate_Checkbox.Name = "autoTranslate_Checkbox";
+            this.autoTranslate_Checkbox.Size = new System.Drawing.Size(91, 17);
+            this.autoTranslate_Checkbox.TabIndex = 18;
+            this.autoTranslate_Checkbox.Text = "Auto translate";
+            this.autoTranslate_Checkbox.UseVisualStyleBackColor = true;
+            // 
+            // manualTranslateOutput_Textbox
+            // 
+            this.manualTranslateOutput_Textbox.BackColor = System.Drawing.SystemColors.Window;
+            this.manualTranslateOutput_Textbox.Enabled = false;
+            this.manualTranslateOutput_Textbox.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.manualTranslateOutput_Textbox.Location = new System.Drawing.Point(6, 295);
+            this.manualTranslateOutput_Textbox.Multiline = true;
+            this.manualTranslateOutput_Textbox.Name = "manualTranslateOutput_Textbox";
+            this.manualTranslateOutput_Textbox.ReadOnly = true;
+            this.manualTranslateOutput_Textbox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.manualTranslateOutput_Textbox.Size = new System.Drawing.Size(131, 78);
+            this.manualTranslateOutput_Textbox.TabIndex = 19;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(579, 379);
+            this.Controls.Add(this.manualTranslateOutput_Textbox);
+            this.Controls.Add(this.autoTranslate_Checkbox);
+            this.Controls.Add(this.clipboard_Checkbox);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.manualTranslateInput_Textbox);
+            this.Controls.Add(this.translate_Button);
             this.Controls.Add(this.zen_Button);
             this.Controls.Add(this.process_Label);
             this.Controls.Add(this.detach_Button);
@@ -138,6 +218,12 @@
         private System.Windows.Forms.Label process_Label;
         private System.Windows.Forms.Button zen_Button;
         public System.Windows.Forms.TextBox console_Textbox;
+        private System.Windows.Forms.Button translate_Button;
+        public System.Windows.Forms.TextBox manualTranslateInput_Textbox;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.CheckBox clipboard_Checkbox;
+        private System.Windows.Forms.CheckBox autoTranslate_Checkbox;
+        public System.Windows.Forms.TextBox manualTranslateOutput_Textbox;
     }
 }
 

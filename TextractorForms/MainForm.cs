@@ -14,18 +14,22 @@ namespace TextractorForms {
         public static MainForm instance;
         private readonly Dictionary<IntPtr, TextThreadData> textThreadData = new Dictionary<IntPtr, TextThreadData>();
         private readonly List<IntPtr> textThreads = new List<IntPtr>();
-        private int attachedPid = 0;
-        private IntPtr server = IntPtr.Zero;
+        private int attachedPid;
+        private readonly IntPtr server = IntPtr.Zero;
+        private readonly Dictionary<string, string> translationCache = new Dictionary<string, string>();
+        private bool clientConnected = false;
+        private ZenForm zenForm;
 
         public MainForm() {
             instance = this;
             InitializeComponent();
 
-            server = Interop.Socket_ServerOpenWrapper(42942, OnServerRecv);
-
             Interop.Ext_StartWrapper();
             ThreadAdded(IntPtr.Zero, "Console");
             textThread_Dropdown.SelectedIndex = 0;
+
+            server = Interop.Socket_ServerOpenWrapper(42942, OnServerRecv);
+            StartTranslatorClient();
 
             timer.Interval = 200;
             timer.Start();
@@ -38,6 +42,11 @@ namespace TextractorForms {
             textThread_Dropdown.Width = rightColWidth;
             console_Textbox.Width = rightColWidth;
             console_Textbox.Height = ClientSize.Height - textThread_Dropdown.Height - 20;
+
+            int height = (this.ClientSize.Height - manualTranslateInput_Textbox.Location.Y - 16) / 2;
+            manualTranslateInput_Textbox.Height = height;
+            manualTranslateOutput_Textbox.Height = height;
+            manualTranslateOutput_Textbox.Top = manualTranslateInput_Textbox.Bottom + 8;
         }
 
         private void AttachPressed(object sender, EventArgs e) {
@@ -50,10 +59,13 @@ namespace TextractorForms {
         }
         private void ZenModeClicked(object sender, EventArgs e) {
             this.Hide();
-            var form = new ZenForm();
-            console_Textbox.TextChanged += form.OnTextChanged;
-            form.ShowDialog();
-            console_Textbox.TextChanged -= form.OnTextChanged;
+            zenForm = new ZenForm();
+            zenForm.console_Textbox.Clear();
+            var textThread = textThreads[textThread_Dropdown.SelectedIndex];
+            zenForm.console_Textbox.Text = textThreadData[textThread].Last().DisplayText();
+            zenForm.console_Textbox.AppendText(" ");
+            zenForm.ShowDialog();
+            zenForm = null;
             this.Show();
         }
 
@@ -67,6 +79,19 @@ namespace TextractorForms {
                 );
 
             Interop.Socket_ServerUpdate(server);
+            if (!clientConnected && Interop.Socket_ServerConnected(server) == 1) {
+                clientConnected = true;
+                translate_Button.Enabled = true;
+                manualTranslateInput_Textbox.Enabled = true;
+                manualTranslateOutput_Textbox.Enabled = true;
+                Log("Translator initialized.");
+            } else if (clientConnected && Interop.Socket_ServerConnected(server) == 0) {
+                clientConnected = false;
+                translate_Button.Enabled = false;
+                manualTranslateInput_Textbox.Enabled = false;
+                manualTranslateOutput_Textbox.Enabled = false;
+                Log("Translator disconnected due to an error.");
+            }
         }
 
         private static string Hex(IntPtr p) {
@@ -74,7 +99,7 @@ namespace TextractorForms {
         }
 
         private void ProcessConnected(int pid) {
-            Log($"ProcessConnected {pid}");
+            Log($"Process connected. PID={pid}.");
             process_Label.Text = Process.GetProcessById(pid).ProcessName;
             attachedPid = pid;
 
@@ -83,7 +108,7 @@ namespace TextractorForms {
         }
 
         private void ProcessDisconnected(int pid) {
-            Log($"ProcessDisconnected {pid}");
+            Log($"Process disconnected. PID={pid}.");
 
             process_Label.Text = "No process";
             for (int i = 1; i < textThreads.Count; i++)
@@ -103,16 +128,19 @@ namespace TextractorForms {
                 return;
 
             if (name != "Console")
-                textThread_Dropdown.Items.Add($"{Hex(addr)} {name}");
+                textThread_Dropdown.Items.Add($"{Hex(addr)}:{name}");
             else
                 textThread_Dropdown.Items.Add(name);
+
             textThreads.Add(addr);
             textThreadData.Add(addr, new TextThreadData() { Translatable = name != "Console" });
-            Log($"ThreadAdded {Hex(addr)} {name}");
+
+            if (name != "Console")
+                Log($"Thread added {Hex(addr)}:{name}");
         }
 
         private void ThreadRemoved(IntPtr addr, string name) {
-            Log($"ThreadRemoved {Hex(addr)} {name}");
+            Log($"Thread removed {Hex(addr)}:{name}");
             textThread_Dropdown.Items.Remove($"{Hex(addr)} {name}");
         }
 
@@ -126,34 +154,105 @@ namespace TextractorForms {
                 textThreadData.Add(addr, new TextThreadData());
             textThreadData[addr].AddEntry(text);
 
-            try {
-                if (textThreads[textThread_Dropdown.SelectedIndex] == addr) {
-                    console_Textbox.AppendText("\r\n" + textThreadData[addr].Last().DisplayText());
+            if (textThread_Dropdown.SelectedIndex != -1 && textThreads[textThread_Dropdown.SelectedIndex] == addr) {
+                AppendSentenceToCurrentConsole(GetTextThread().Last().DisplayText());
+
+                if (textThread_Dropdown.SelectedIndex > 0 && autoTranslate_Checkbox.Checked) {
+                    string jp = GetTextThread().Last().extracted;
+                    if (clipboard_Checkbox.Checked)
+                        Clipboard.SetText(jp);
+                    Translate(jp);
                 }
-            } catch (ArgumentOutOfRangeException) { }
+            }
         }
 
         public void Log(object obj) {
-            //Debug.WriteLine(obj.ToString());
             SentenceReceived(IntPtr.Zero, "Console", obj.ToString());
         }
 
         private void HookIndexChanged(object sender, EventArgs e) {
+            UpdateConsole();
+        }
+
+        private void OnFormClosed(object sender, FormClosedEventArgs e) {
+            if (attachedPid != 0)
+                DetachPressed(sender, e);
+            Interop.Socket_ServerClose(server);
+        }
+
+        private TextThreadData GetTextThread() {
+            var textThread = textThreads[textThread_Dropdown.SelectedIndex];
+            return textThreadData[textThread];
+        }
+
+        private void AppendSentenceToCurrentConsole(string text) {
+            console_Textbox.AppendText(text + "\r\n");
+            if (GetTextThread().Translatable)
+                console_Textbox.AppendText("\r\n");
+            if (zenForm != null) {
+                zenForm.console_Textbox.Text = text;
+            }
+        }
+
+        private void UpdateConsole() {
+            zenForm?.console_Textbox.Clear();
             if (textThread_Dropdown.SelectedIndex < textThreads.Count) {
                 var textThread = textThreads[textThread_Dropdown.SelectedIndex];
                 console_Textbox.Clear();
                 console_Textbox.AppendText(textThreadData[textThread].DisplayText());
+                if (textThreadData[textThread].Translatable)
+                    console_Textbox.AppendText("\r\n");
+                if (zenForm != null && textThreadData[textThread].entries.Count > 0)
+                    zenForm.console_Textbox.Text = textThreadData[textThread].Last().DisplayText();
             } else {
                 console_Textbox.Clear();
             }
         }
 
-        private void OnFormClosed(object sender, FormClosedEventArgs e) {
-            Interop.Socket_ServerClose(server);
+        private void OnServerRecv(string data) {
+            //Log("Tcp: " + data);
+
+            int sepIndex = data.IndexOf("^&*");
+            string jp = data.Substring(0, sepIndex);
+            string en = data.Substring(sepIndex + 3)
+                .Replace("<unk>", "");
+
+            if (!translationCache.ContainsKey(jp))
+                translationCache.Add(jp, en);
+            Clipboard.SetText(en);
+
+            foreach (var entry in GetTextThread().entries) {
+                if (entry.extracted == jp) {
+                    entry.translated = en;
+                }
+            }
+
+            if (manualTranslateInput_Textbox.Text == jp) {
+                manualTranslateOutput_Textbox.Text = en;
+            }
+
+            UpdateConsole();
         }
 
-        private void OnServerRecv(string data) {
-            Log("Tcp: " + data);
+        private void StartTranslatorClient() {
+            Log("Initializing translator. No translations will be performed in the meantime.");
+            try {
+                Process.Start("C:/Users/kevlu/source/Repos/TextractorForms/Translator/Python38/pythonw.exe", "../Translator/main.py");
+            } catch (Exception ex){
+                Log("Error starting translator: " + ex.Message);
+            }
+        }
+
+        private void ManualTranslateClicked(object sender, EventArgs e) {
+            Translate(manualTranslateInput_Textbox.Text);
+        }
+
+        private void Translate(string text) {
+            if (translationCache.ContainsKey(text)) {
+                OnServerRecv(text + "^&*" + translationCache[text]);
+            } else {
+                Interop.Socket_ServerSendAllWrapper(server, text);
+            }
         }
     }
 }

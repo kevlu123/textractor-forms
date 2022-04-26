@@ -11,7 +11,10 @@ using System.Runtime.InteropServices;
 
 namespace TextractorForms {
     public static class Interop {
-        private static List<object> keepAlive = new List<object>();
+        private static readonly List<object> keepAlive = new List<object>();
+
+        [DllImport("user32.dll")]
+        public static extern bool HideCaret(IntPtr hWnd);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate void ReceiveCallbackNative(IntPtr data, int len);
@@ -38,7 +41,7 @@ namespace TextractorForms {
         public static extern void Socket_ServerClose(IntPtr socket);
 
         [DllImport("Socket_x86.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool Socket_ServerConnected(IntPtr socket);
+        public static extern byte Socket_ServerConnected(IntPtr socket);
 
         [DllImport("Socket_x86.dll", CallingConvention = CallingConvention.Cdecl)]
         private static extern void Socket_ServerSendAll(IntPtr socket, IntPtr data, int len);
@@ -53,7 +56,6 @@ namespace TextractorForms {
                 }
             }
         }
-
 
         [DllImport("Extractor.dll", CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr Ext_GetProcessList();

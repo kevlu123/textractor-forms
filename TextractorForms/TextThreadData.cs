@@ -5,38 +5,27 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace TextractorForms {
-    public enum TranslationState {
-        NA,
-        Waiting,
-        Done
-    }
     class TextThreadData {
         public bool Translatable { get; set; } = true;
-        public struct Entry {
-            public TranslationState translationState;
+        public class Entry {
+            public bool translatable;
             public string extracted;
             public string translated;
             public string DisplayText() {
-                switch (translationState) {
-                    case TranslationState.NA:
-                        return extracted;
-                    case TranslationState.Waiting:
-                        return extracted + "\r\n" + (translated ?? "[...]") + "\r\n";
-                    default:
-                        return extracted + "\r\n";
+                if (!translatable) {
+                    return extracted;
+                } else {
+                    return extracted + "\r\n" + (translated ?? "[...]") + "\r\n";
                 }
             }
         }
 
-        private readonly Queue<Entry> entries = new Queue<Entry>();
+        public readonly Queue<Entry> entries = new Queue<Entry>();
 
         public void AddEntry(string extracted) {
-            if (entries.Count >= 32)
+            entries.Enqueue(new Entry { extracted = extracted, translatable = Translatable });
+            while (DisplayText().Length > 10000)
                 entries.Dequeue();
-            entries.Enqueue(new Entry {
-                extracted = extracted,
-                translationState = Translatable ? TranslationState.Done : TranslationState.NA,
-                });
         }
 
         public Entry Last() {

@@ -12,15 +12,9 @@ namespace TextractorForms {
     public partial class ZenForm : Form {
         public ZenForm() {
             InitializeComponent();
-            OnTextChanged(this, EventArgs.Empty);
-            OnClientSizeChanged(this, EventArgs.Empty);
-            this.Focus();
-        }
 
-        public void OnTextChanged(object sender, EventArgs e) {
-            string text = MainForm.instance.console_Textbox.Text;
-            console_Textbox.Text = text.Substring(0, text.Length - 1);
-            console_Textbox.AppendText(text.Last().ToString());
+            OnClientSizeChanged(this, EventArgs.Empty);
+            console_Textbox.BackColor = Color.CornflowerBlue;
         }
 
         private void OnClientSizeChanged(object sender, EventArgs e) {
