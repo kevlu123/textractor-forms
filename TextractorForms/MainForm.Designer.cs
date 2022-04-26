@@ -24,6 +24,7 @@
         /// </summary>
         private void InitializeComponent() {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.attach_Button = new System.Windows.Forms.Button();
             this.textThread_Dropdown = new System.Windows.Forms.ComboBox();
             this.console_Textbox = new System.Windows.Forms.TextBox();
@@ -200,6 +201,7 @@
             this.Controls.Add(this.console_Textbox);
             this.Controls.Add(this.textThread_Dropdown);
             this.Controls.Add(this.attach_Button);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MinimumSize = new System.Drawing.Size(595, 418);
             this.Name = "MainForm";
             this.Text = "TextractorForms";
