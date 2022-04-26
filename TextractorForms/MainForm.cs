@@ -8,6 +8,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
+using System.IO;
+using System.Reflection;
 
 namespace TextractorForms {
     public partial class MainForm : Form {
@@ -16,13 +18,19 @@ namespace TextractorForms {
         private readonly List<IntPtr> textThreads = new List<IntPtr>();
         private int attachedPid;
         private readonly IntPtr server = IntPtr.Zero;
-        private readonly Dictionary<string, string> translationCache = new Dictionary<string, string>();
         private bool clientConnected = false;
         private ZenForm zenForm;
+        private readonly Config cfg;
+        private readonly Config translationCache;
 
         public MainForm() {
             instance = this;
             InitializeComponent();
+
+            translationCache = new Config("Cache.txt");
+            cfg = new Config("TextractorForms.ini");
+            clipboard_Checkbox.Checked = cfg.GetBool("copy_to_clipboard", false);
+            autoTranslate_Checkbox.Checked = cfg.GetBool("auto_translate", true);
 
             Interop.Ext_StartWrapper();
             ThreadAdded(IntPtr.Zero, "Console");
@@ -111,8 +119,10 @@ namespace TextractorForms {
             Log($"Process disconnected. PID={pid}.");
 
             process_Label.Text = "No process";
-            for (int i = 1; i < textThreads.Count; i++)
+            for (int i = 1; i < textThreads.Count; i++) {
                 textThreadData.Remove(textThreads[i]);
+                textThread_Dropdown.Items.RemoveAt(1);
+            }
             textThreads.RemoveRange(1, textThreads.Count - 1);
             attachedPid = 0;
             textThread_Dropdown.SelectedIndex = 0;
@@ -157,12 +167,12 @@ namespace TextractorForms {
             if (textThread_Dropdown.SelectedIndex != -1 && textThreads[textThread_Dropdown.SelectedIndex] == addr) {
                 AppendSentenceToCurrentConsole(GetTextThread().Last().DisplayText());
 
-                if (textThread_Dropdown.SelectedIndex > 0 && autoTranslate_Checkbox.Checked) {
-                    string jp = GetTextThread().Last().extracted;
-                    if (clipboard_Checkbox.Checked)
-                        Clipboard.SetText(jp);
+                string jp = GetTextThread().Last().extracted;
+                if (clipboard_Checkbox.Checked)
+                    Clipboard.SetText(jp);
+
+                if (textThread_Dropdown.SelectedIndex > 0 && autoTranslate_Checkbox.Checked)
                     Translate(jp);
-                }
             }
         }
 
@@ -175,6 +185,11 @@ namespace TextractorForms {
         }
 
         private void OnFormClosed(object sender, FormClosedEventArgs e) {
+            translationCache.Save();
+            cfg.Set("copy_to_clipboard", clipboard_Checkbox.Checked);
+            cfg.Set("auto_translate", autoTranslate_Checkbox.Checked);
+            cfg.Save();
+
             if (attachedPid != 0)
                 DetachPressed(sender, e);
             Interop.Socket_ServerClose(server);
@@ -210,16 +225,13 @@ namespace TextractorForms {
         }
 
         private void OnServerRecv(string data) {
-            //Log("Tcp: " + data);
-
             int sepIndex = data.IndexOf("^&*");
             string jp = data.Substring(0, sepIndex);
             string en = data.Substring(sepIndex + 3)
                 .Replace("<unk>", "");
 
-            if (!translationCache.ContainsKey(jp))
-                translationCache.Add(jp, en);
-            Clipboard.SetText(en);
+            if (!translationCache.ContainsProperty(jp))
+                translationCache.Set(jp, en);
 
             foreach (var entry in GetTextThread().entries) {
                 if (entry.extracted == jp) {
@@ -236,8 +248,9 @@ namespace TextractorForms {
 
         private void StartTranslatorClient() {
             Log("Initializing translator. No translations will be performed in the meantime.");
+            var curDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             try {
-                Process.Start("C:/Users/kevlu/source/Repos/TextractorForms/Translator/Python38/pythonw.exe", "../Translator/main.py");
+                Process.Start(curDir + "/Translator/Python38/pythonw.exe", "./Translator/main.py");
             } catch (Exception ex){
                 Log("Error starting translator: " + ex.Message);
             }
@@ -248,8 +261,8 @@ namespace TextractorForms {
         }
 
         private void Translate(string text) {
-            if (translationCache.ContainsKey(text)) {
-                OnServerRecv(text + "^&*" + translationCache[text]);
+            if (translationCache.ContainsProperty(text)) {
+                OnServerRecv(text + "^&*" + translationCache.GetString(text));
             } else {
                 Interop.Socket_ServerSendAllWrapper(server, text);
             }
