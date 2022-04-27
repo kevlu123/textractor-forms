@@ -18,7 +18,7 @@ namespace TextractorForms {
         private readonly List<IntPtr> textThreads = new List<IntPtr>();
         private int attachedPid;
         private readonly IntPtr server = IntPtr.Zero;
-        private bool clientConnected = false;
+        private bool clientConnected;
         private ZenForm zenForm;
         private readonly Config cfg;
         private readonly Config translationCache;
@@ -41,6 +41,15 @@ namespace TextractorForms {
 
             timer.Interval = 200;
             timer.Start();
+
+            var (pos, size) = GetConfigWindowDimensions("main_window", 595, 418);
+            if (pos.HasValue) {
+                this.StartPosition = FormStartPosition.Manual;
+                this.Location = pos.Value;
+            }
+            if (size.HasValue) {
+                this.Size = size.Value;
+            }
 
             OnResize(this, EventArgs.Empty);
         }
@@ -67,7 +76,8 @@ namespace TextractorForms {
         }
         private void ZenModeClicked(object sender, EventArgs e) {
             this.Hide();
-            zenForm = new ZenForm();
+            var (pos, size) = GetConfigWindowDimensions("zen_window", 1200, 300);
+            zenForm = new ZenForm(pos, size);
             zenForm.console_Textbox.Clear();
             var textThread = textThreads[textThread_Dropdown.SelectedIndex];
             zenForm.console_Textbox.Text = textThreadData[textThread].Last().DisplayText();
@@ -75,6 +85,31 @@ namespace TextractorForms {
             zenForm.ShowDialog();
             zenForm = null;
             this.Show();
+
+            SetConfigWindowDimensions("zen_window", ZenForm.formPosition, ZenForm.formSize);
+        }
+
+        private (Point? pos, Size? size) GetConfigWindowDimensions(string property, int defaultWidth, int defaultHeight) {
+            Point? pos = null;
+            Size? size = null;
+            if (cfg.ContainsProperty($"{property}_x")) {
+                pos = new Point(
+                    cfg.GetInt($"{property}_x", 0),
+                    cfg.GetInt($"{property}_y", 0)
+                    );
+                size = new Size(
+                    cfg.GetInt($"{property}_w", defaultWidth),
+                    cfg.GetInt($"{property}_h", defaultHeight)
+                    );
+            }
+            return (pos, size);
+        }
+
+        private void SetConfigWindowDimensions(string property, Point pos, Size size) {
+            cfg.Set($"{property}_x", pos.X);
+            cfg.Set($"{property}_y", pos.Y);
+            cfg.Set($"{property}_w", size.Width);
+            cfg.Set($"{property}_h", size.Height);
         }
 
         private void OnTimerTicked(object sender, EventArgs e) {
@@ -186,6 +221,8 @@ namespace TextractorForms {
 
         private void OnFormClosed(object sender, FormClosedEventArgs e) {
             translationCache.Save();
+
+            SetConfigWindowDimensions("main_window", this.Location, this.Size);
             cfg.Set("copy_to_clipboard", clipboard_Checkbox.Checked);
             cfg.Set("auto_translate", autoTranslate_Checkbox.Checked);
             cfg.Save();

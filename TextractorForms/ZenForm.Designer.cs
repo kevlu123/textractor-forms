@@ -53,6 +53,7 @@
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Show;
             this.Text = "Zen";
             this.TopMost = true;
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.OnFormClosed);
             this.ClientSizeChanged += new System.EventHandler(this.OnClientSizeChanged);
             this.ResumeLayout(false);
             this.PerformLayout();
