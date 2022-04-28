@@ -13,6 +13,12 @@ namespace TextractorForms {
     public static class Interop {
         private static readonly List<object> keepAlive = new List<object>();
 
+        [DllImport("extractor.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void SetCurrentTextThread(IntPtr textThread);
+
+        [DllImport("extractor.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+        public static extern void LoadExtension(string dll);
+
         [DllImport("user32.dll")]
         public static extern bool HideCaret(IntPtr hWnd);
 

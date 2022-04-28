@@ -17,15 +17,18 @@ namespace TextractorForms {
         private readonly Dictionary<IntPtr, TextThreadData> textThreadData = new Dictionary<IntPtr, TextThreadData>();
         private readonly List<IntPtr> textThreads = new List<IntPtr>();
         private int attachedPid;
-        private readonly IntPtr server = IntPtr.Zero;
+        private readonly IntPtr server;
         private bool clientConnected;
         private ZenForm zenForm;
         private readonly Config cfg;
         private readonly Config translationCache;
+        private readonly string curDir;
 
         public MainForm() {
             instance = this;
             InitializeComponent();
+
+            curDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
             translationCache = new Config("Cache.txt");
             cfg = new Config("TextractorForms.ini");
@@ -50,6 +53,8 @@ namespace TextractorForms {
             if (size.HasValue) {
                 this.Size = size.Value;
             }
+
+            LoadExtensions();
 
             OnResize(this, EventArgs.Empty);
         }
@@ -216,6 +221,9 @@ namespace TextractorForms {
         }
 
         private void HookIndexChanged(object sender, EventArgs e) {
+            try {
+                Interop.SetCurrentTextThread(textThreads[textThread_Dropdown.SelectedIndex]);
+            } catch (ArgumentOutOfRangeException) { }
             UpdateConsole();
         }
 
@@ -285,7 +293,6 @@ namespace TextractorForms {
 
         private void StartTranslatorClient() {
             Log("Initializing translator. No translations will be performed in the meantime.");
-            var curDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             try {
                 Process.Start(curDir + "/Translator/Python38/pythonw.exe", "./Translator/main.py");
             } catch (Exception ex){
@@ -302,6 +309,19 @@ namespace TextractorForms {
                 OnServerRecv(text + "^&*" + translationCache.GetString(text));
             } else {
                 Interop.Socket_ServerSendAllWrapper(server, text);
+            }
+        }
+
+        private void LoadExtensions() {
+            string[] dlls;
+            try {
+                dlls = File.ReadAllLines(curDir + "/ExtensionOrder.txt");
+            } catch {
+                return;
+            }
+
+            foreach (string dll in dlls) {
+                Interop.LoadExtension($"{curDir}/Extensions/{dll}");
             }
         }
     }
